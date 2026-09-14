@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mi Bolsillo</title>
+<meta name="theme-color" content="#0e1014">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Mi Bolsillo">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="loading">
+
+<!-- Entrada -->
+<section class="auth" id="authView" hidden>
+  <div class="auth-card panel">
+    <div class="auth-brand">
+      <img src="icons/icon-192.png" alt="">
+      <div>
+        <h1>Mi Bolsillo</h1>
+        <p>Tus gastos e ingresos del mes</p>
+      </div>
+    </div>
+    <form id="authForm" autocomplete="on">
+      <div class="field">
+        <label for="authEmail">Correo</label>
+        <input id="authEmail" type="email" autocomplete="email" inputmode="email" required>
+      </div>
+      <div class="field">
+        <label for="authPassword">Contraseña</label>
+        <input id="authPassword" type="password" autocomplete="current-password" minlength="6" required>
+      </div>
+      <button type="submit" class="btn primary wide" id="authSubmit">Entrar</button>
+      <div class="auth-msg" id="authMsg" role="status"></div>
+      <button type="button" class="linkbtn" id="authToggle">¿Primera vez? Crear cuenta</button>
+    </form>
+  </div>
+</section>
+
+<!-- App -->
+<div id="appView" hidden>
+<div class="search" id="search">
+  <div class="search-box">
+    <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M13 13l4.5 4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    <input id="searchInput" type="search" placeholder="Buscar: «pago de Juan», 50.000, ocio…" autocomplete="off" enterkeyhint="search" aria-label="Buscar movimientos" aria-controls="searchResults">
+    <button type="button" class="search-clear" id="searchClear" aria-label="Borrar búsqueda" hidden>×</button>
+  </div>
+  <div class="search-results" id="searchResults" hidden></div>
+</div>
+<header class="topbar">
+  <div class="month-nav">
+    <button class="btn icon" id="prevMonth" title="Mes anterior">‹</button>
+    <div class="label" id="monthLabel"></div>
+    <button class="btn icon" id="nextMonth" title="Mes siguiente">›</button>
+    <button class="btn ghost small" id="todayMonth">Hoy</button>
+  </div>
+  <div class="tools">
+    <button type="button" class="sync" id="sync" data-state="loading">Cargando…</button>
+    <button class="btn" id="exportBtn">Exportar JSON</button>
+    <button class="btn" id="importBtn">Importar JSON</button>
+    <button class="btn ghost" id="logoutBtn">Salir</button>
+    <input type="file" id="importFile" accept="application/json,.json" hidden>
+  </div>
+</header>
+
+<main>
+<section class="grid-top">
+  <div class="panel">
+    <h2 id="formTitle">Nuevo movimiento</h2>
+    <div class="editing-note" id="editingNote" hidden>Estás editando un movimiento existente.</div>
+    <form id="moveForm" autocomplete="off">
+      <div class="type-toggle" role="group" aria-label="Tipo">
+        <button type="button" data-tipo="gasto" class="on">Gasto</button>
+        <button type="button" data-tipo="ingreso">Ingreso</button>
+      </div>
+      <div class="field">
+        <label for="fMonto">Monto (COP)</label>
+        <input id="fMonto" class="amount-input num" inputmode="numeric" placeholder="0">
+      </div>
+      <div class="row-2">
+        <div class="field">
+          <label for="fCategoria">Categoría</label>
+          <select id="fCategoria"></select>
+        </div>
+        <div class="field">
+          <label for="fFecha">Fecha</label>
+          <input id="fFecha" type="date">
+        </div>
+      </div>
+      <div class="field">
+        <label for="fNota">Nota (opcional)</label>
+        <textarea id="fNota" rows="1" maxlength="140"></textarea>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn primary" id="submitBtn">Agregar</button>
+        <button type="button" class="btn" id="cancelEdit" hidden>Cancelar</button>
+      </div>
+      <div class="form-error" id="formError"></div>
+    </form>
+  </div>
+
+  <div class="panel">
+    <h2>Resumen del mes</h2>
+    <div class="kpis">
+      <div class="kpi income"><div class="k-label">Ingresos</div><div class="k-value num" id="kIngresos"></div><div class="k-sub" id="kIngresosSub"></div></div>
+      <div class="kpi"><div class="k-label">Gastos</div><div class="k-value num" id="kGastos"></div><div class="k-sub" id="kGastosSub"></div></div>
+      <div class="kpi left"><div class="k-label">Queda</div><div class="k-value num" id="kQueda"></div><div class="k-sub" id="kQuedaSub"></div></div>
+    </div>
+    <div class="compare" id="compare"></div>
+    <div class="sample-note" id="sampleNote" hidden>
+      <span>Estás viendo datos de ejemplo.</span>
+      <button class="btn small" id="clearSample">Borrar datos de ejemplo</button>
+    </div>
+    <div class="sample-note" id="emptyNote" hidden>
+      <span>Todavía no hay movimientos. Empieza a anotar o mira cómo se ve con</span>
+      <button class="btn small" id="loadSample">datos de ejemplo</button>
+    </div>
+  </div>
+</section>
+
+<section class="grid-2">
+  <div class="panel">
+    <h2>Gastos por categoría</h2>
+    <div id="donut"></div>
+  </div>
+  <div class="panel bars">
+    <h2>Últimos 6 meses</h2>
+    <div id="barChart"></div>
+    <div class="bars-note" id="barsNote"></div>
+  </div>
+</section>
+
+<section class="grid-2">
+  <div class="panel">
+    <div class="list-head">
+      <h2>Movimientos del mes</h2>
+      <select id="filterCat" aria-label="Filtrar por categoría"></select>
+    </div>
+    <ul class="moves" id="moves"></ul>
+    <div class="list-total num" id="listTotal"></div>
+  </div>
+  <div class="panel">
+    <h2>Presupuestos mensuales</h2>
+    <div id="budgets"></div>
+  </div>
+</section>
+</main>
+</div>
+
+<div class="modal" id="modal" hidden>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalText">
+    <p id="modalText"></p>
+    <div class="modal-actions">
+      <button class="btn" id="modalNo">Cancelar</button>
+      <button class="btn danger" id="modalYes">Sí</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
