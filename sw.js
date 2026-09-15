@@ -1,6 +1,6 @@
 // Guarda la app en el celular para que abra aunque no haya señal.
 // Al publicar cambios, subir el número de VERSION para que los celulares se actualicen.
-const VERSION = 'mi-bolsillo-v1';
+const VERSION = 'mi-bolsillo-v2';
 const SUPABASE_LIB = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js';
 const SHELL = [
   './',
